@@ -1,28 +1,51 @@
 export default async function handler(req, res) {
+  try {
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Method not allowed" });
+    }
 
-const { name, age, hobby, style } = req.body;
+    const body =
+      typeof req.body === "string"
+        ? JSON.parse(req.body)
+        : req.body || {};
 
-const prompt = `Write a ${style} birthday message for ${name} who is turning ${age}. 
-${hobby ? `They enjoy ${hobby}.` : ""}
-Keep it fun and under 60 words.`
+    const { name, age, hobby, style } = body;
 
-const response = await fetch("https://api.openai.com/v1/chat/completions",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-"Authorization":`Bearer ${process.env.OPENAI_API_KEY}`
-},
-body:JSON.stringify({
-model:"gpt-4o-mini",
-messages:[{role:"user",content:prompt}],
-temperature:0.9
-})
-})
+    if (!name || !age) {
+      return res.status(400).json({ error: "Name and age are required" });
+    }
 
-const data = await response.json()
+    const prompt = `Write a ${style || "funny"} birthday message for someone named ${name} who is turning ${age}. ${
+      hobby ? `They enjoy ${hobby}.` : ""
+    } Keep it fun, warm, and under 60 words.`;
 
-res.status(200).json({
-message:data.choices[0].message.content
-})
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.9
+      })
+    });
 
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("OpenAI API error:", data);
+      return res.status(response.status).json({
+        error: data.error?.message || "OpenAI request failed"
+      });
+    }
+
+    return res.status(200).json({
+      message: data.choices?.[0]?.message?.content || "No message generated"
+    });
+  } catch (error) {
+    console.error("Server error:", error);
+    return res.status(500).json({ error: "AI generation failed" });
+  }
 }
