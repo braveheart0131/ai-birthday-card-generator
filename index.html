@@ -207,34 +207,37 @@ document.getElementById("result").innerText="Please enter at least a name and ag
 return
 }
 
-const prompt=`Write a ${style} birthday message for someone named ${name} who is turning ${age}. ${hobby?`They enjoy ${hobby}.`:""} Keep it fun and under 60 words.`
+document.getElementById("result").innerText="Generating birthday magic... 🎉"
 
 try{
 
-const response=await fetch("https://api.openai.com/v1/chat/completions",{
+const response=await fetch("https://bday-card-generator.vercel.app/api/generate",{
 method:"POST",
 headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer YOUR_OPENAI_API_KEY"
+"Content-Type":"application/json"
 },
 body:JSON.stringify({
-model:"gpt-4o-mini",
-messages:[{role:"user",content:prompt}],
-temperature:0.9
+name,
+age,
+hobby,
+style
 })
 })
 
 const data=await response.json()
 
-const message=data.choices[0].message.content
+if(!response.ok){
+document.getElementById("result").innerText=data.error || "AI generation failed."
+return
+}
 
-document.getElementById("result").innerText=message
+document.getElementById("result").innerText=data.message
 
 launchConfetti()
 
 }catch(err){
 
-document.getElementById("result").innerText="AI generation failed. Check API key." 
+document.getElementById("result").innerText="Could not reach AI service."
 
 }
 
