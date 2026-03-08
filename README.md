@@ -1,4 +1,4 @@
-# birthday-card-generator
+# AI Birthday Card Generator (OpenAI + Vercel + GitHub Pages)
 
 AI Birthday Card Generator
 
