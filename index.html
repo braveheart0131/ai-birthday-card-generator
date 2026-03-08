@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ultimate Birthday Card Generator</title>
+
+<style>
+
+body{
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  margin:0;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background: linear-gradient(-45deg,#ff9a9e,#fad0c4,#fbc2eb,#a18cd1,#84fab0,#8fd3f4);
+  background-size:400% 400%;
+  animation:gradientBG 12s ease infinite;
+}
+
+@keyframes gradientBG{
+ 0%{background-position:0% 50%}
+ 50%{background-position:100% 50%}
+ 100%{background-position:0% 50%}
+}
+
+.container{
+  width:460px;
+  background:white;
+  border-radius:18px;
+  padding:28px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.2);
+  text-align:center;
+  position:relative;
+}
+
+h1{
+ margin-top:0;
+}
+
+.emojiRow{
+ font-size:28px;
+ margin-bottom:8px;
+}
+
+label{
+ display:block;
+ text-align:left;
+ margin-top:12px;
+ font-weight:600;
+}
+
+input,select{
+ width:100%;
+ padding:10px;
+ margin-top:5px;
+ border-radius:8px;
+ border:1px solid #ccc;
+}
+
+button{
+ margin-top:18px;
+ width:100%;
+ padding:12px;
+ border:none;
+ border-radius:10px;
+ background:linear-gradient(135deg,#ff4d6d,#ff8fab);
+ color:white;
+ font-size:16px;
+ font-weight:bold;
+ cursor:pointer;
+ transition:transform .15s;
+}
+
+button:hover{
+ transform:scale(1.03);
+}
+
+.cardOutput{
+ margin-top:22px;
+ padding:20px;
+ border-radius:16px;
+ background:linear-gradient(135deg,#fff3b0,#ffd6e0);
+ border:2px dashed #ff4d6d;
+ min-height:100px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:16px;
+}
+
+.copyBtn{
+ margin-top:10px;
+ background:#4CAF50;
+}
+
+.copyBtn:hover{
+ transform:scale(1.03);
+}
+
+.confetti{
+ position:fixed;
+ width:8px;
+ height:8px;
+ background:red;
+ top:-10px;
+ animation:fall 3s linear forwards;
+}
+
+@keyframes fall{
+ to{
+  transform:translateY(110vh) rotate(720deg);
+ }
+}
+
+footer{
+ font-size:12px;
+ margin-top:8px;
+ color:#777;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="emojiRow">🎉🎈🎂🎁</div>
+<h1>Birthday Card Generator</h1>
+
+<label>Name</label>
+<input id="name" placeholder="Enter name" />
+
+<label>Age</label>
+<input id="age" type="number" placeholder="Enter age" />
+
+<label>Hobby</label>
+<input id="hobby" placeholder="gaming, golf, painting..." />
+
+<label>Humor Style</label>
+<select id="style">
+<option value="funny">Funny</option>
+<option value="wholesome">Wholesome</option>
+<option value="roast">Playful Roast</option>
+</select>
+
+<button onclick="generateMessage()">Generate Birthday Message 🎉</button>
+
+<div class="cardOutput" id="result">Your birthday message will appear here 🎂</div>
+
+<button class="copyBtn" onclick="copyMessage()">📋 Copy Message</button>
+
+<footer>Made for celebrations 🎊</footer>
+
+</div>
+
+<script>
+
+function generateMessage(){
+
+const name=document.getElementById("name").value
+const age=document.getElementById("age").value
+const hobby=document.getElementById("hobby").value
+const style=document.getElementById("style").value
+
+if(!name || !age || !hobby){
+ document.getElementById("result").innerText="Please fill all fields so the birthday magic can begin 🎉"
+ return
+}
+
+let messages=[]
+
+if(style==="funny"){
+ messages=[
+`Happy ${age}th Birthday ${name}! You're not getting older, you're leveling up. Bonus skill unlocked: professional ${hobby}.`,
+`${name}, congrats on ${age}! At this point cake counts as a health food before doing ${hobby}.`,
+`Breaking news: ${name} just reached level ${age}. Celebration quest: eat cake and enjoy ${hobby}.`
+ ]
+}
+
+if(style==="wholesome"){
+ messages=[
+`Happy ${age}th Birthday ${name}! May your day be filled with joy, cake, and plenty of time for ${hobby}.`,
+`${name}, wishing you a wonderful ${age}th birthday full of laughter and everything you love — especially ${hobby}.`,
+`Cheers to ${age} amazing years, ${name}. Keep enjoying life and never stop doing ${hobby}.`
+ ]
+}
+
+if(style==="roast"){
+ messages=[
+`${name}, ${age}? Don't worry — you're not old. You're just... retro. Now go celebrate with some ${hobby}.`,
+`Happy ${age}th ${name}! At this age warming up before ${hobby} counts as exercise.`,
+`${name}, congrats on ${age}. The candles cost more than the cake now. Reward yourself with ${hobby}.`
+ ]
+}
+
+const msg=messages[Math.floor(Math.random()*messages.length)]
+
+document.getElementById("result").innerText=msg
+
+launchConfetti()
+
+}
+
+function copyMessage(){
+
+const text=document.getElementById("result").innerText
+navigator.clipboard.writeText(text)
+
+}
+
+function launchConfetti(){
+
+for(let i=0;i<60;i++){
+
+const conf=document.createElement("div")
+conf.className="confetti"
+conf.style.left=Math.random()*100+"vw"
+conf.style.backgroundColor=`hsl(${Math.random()*360},70%,60%)`
+conf.style.animationDuration=(Math.random()*2+2)+"s"
+
+document.body.appendChild(conf)
+
+setTimeout(()=>{
+ conf.remove()
+},3000)
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
