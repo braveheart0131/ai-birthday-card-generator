@@ -177,21 +177,18 @@ document.getElementById("result").innerText=
 return
 }
 
-const response = await fetch(
-"https://bday-card-generator.vercel.app/api/generate",
-{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-name,
-age,
-hobby,
-style
-})
-}
-)
+const response = await fetch("https://bday-card-generator.vercel.app/api/generate", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    name,
+    age,
+    hobby,
+    style
+  })
+});
 
 const data = await response.json()
 
