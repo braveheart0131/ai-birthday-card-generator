@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
     const { name, age, hobby, style } = body;
 
-    if (!name || !age) {
+    if (!name) {
       return res.status(400).json({ error: "Name and age are required" });
     }
 
