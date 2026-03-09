@@ -1,353 +1,313 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>AI Birthday Card Generator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Birthday Card Generator</title>
 
-<style>
+  <style>
+    body{
+      font-family:'Segoe UI',sans-serif;
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:linear-gradient(-45deg,#ff9a9e,#fad0c4,#fbc2eb,#a18cd1,#84fab0,#8fd3f4);
+      background-size:400% 400%;
+      animation:gradientBG 12s ease infinite;
+      padding:20px;
+    }
 
-body{
-  font-family:'Segoe UI',sans-serif;
-  margin:0;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:linear-gradient(-45deg,#ff9a9e,#fad0c4,#fbc2eb,#a18cd1,#84fab0,#8fd3f4);
-  background-size:400% 400%;
-  animation:gradientBG 12s ease infinite;
-  padding:20px;
-}
+    @keyframes gradientBG{
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
+    }
 
-@keyframes gradientBG{
-0%{background-position:0% 50%}
-50%{background-position:100% 50%}
-100%{background-position:0% 50%}
-}
+    .container{
+      width:100%;
+      max-width:500px;
+      background:white;
+      border-radius:18px;
+      padding:26px;
+      box-shadow:0 20px 50px rgba(0,0,0,0.25);
+      text-align:center;
+    }
 
-.container{
-width:100%;
-max-width:500px;
-background:white;
-border-radius:18px;
-padding:26px;
-box-shadow:0 20px 50px rgba(0,0,0,0.25);
-text-align:center;
-}
+    h1{
+      margin-top:0;
+    }
 
-h1{margin-top:0}
+    .emojiRow{
+      font-size:28px;
+      margin-bottom:6px;
+    }
 
-.emojiRow{font-size:28px;margin-bottom:6px}
+    label{
+      display:block;
+      text-align:left;
+      margin-top:12px;
+      font-weight:600;
+    }
 
-label{
-display:block;
-text-align:left;
-margin-top:12px;
-font-weight:600;
-}
+    input,select{
+      width:100%;
+      padding:11px;
+      margin-top:5px;
+      border-radius:8px;
+      border:1px solid #ccc;
+      font-size:15px;
+      box-sizing:border-box;
+    }
 
-input,select{
-width:100%;
-padding:11px;
-margin-top:5px;
-border-radius:8px;
-border:1px solid #ccc;
-font-size:15px;
-}
+    button{
+      margin-top:16px;
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:10px;
+      background:linear-gradient(135deg,#ff4d6d,#ff8fab);
+      color:white;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+    }
 
-button{
-margin-top:16px;
-width:100%;
-padding:12px;
-border:none;
-border-radius:10px;
-background:linear-gradient(135deg,#ff4d6d,#ff8fab);
-color:white;
-font-size:16px;
-font-weight:bold;
-cursor:pointer;
-}
+    button:hover{
+      opacity:.9;
+    }
 
-button:hover{opacity:.9}
+    button:disabled{
+      opacity:.7;
+      cursor:not-allowed;
+    }
 
-.cardOutput{
-margin-top:22px;
-padding:20px;
-border-radius:16px;
-background:linear-gradient(135deg,#fff3b0,#ffd6e0);
-border:2px dashed #ff4d6d;
-min-height:110px;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:16px;
-text-align:center;
-}
+    .cardOutput{
+      margin-top:22px;
+      padding:20px;
+      border-radius:16px;
+      background:linear-gradient(135deg,#fff3b0,#ffd6e0);
+      border:2px dashed #ff4d6d;
+      min-height:110px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:16px;
+      text-align:center;
+      word-wrap:break-word;
+      line-height:1.5;
+    }
 
-.shareButtons{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:10px;
-margin-top:12px;
-}
+    .shareButtons{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+      margin-top:12px;
+    }
 
-.shareButtons button{
-font-size:14px;
-padding:10px;
-}
+    .shareButtons button{
+      font-size:14px;
+      padding:10px;
+      margin-top:0;
+    }
 
-.copyBtn{background:#4CAF50}
-.whatsappBtn{background:#25D366}
-.smsBtn{background:#2b6ef2}
-.emailBtn{background:#6f42c1}
+    .copyBtn{background:#4CAF50}
+    .whatsappBtn{background:#25D366}
+    .smsBtn{background:#2b6ef2}
+    .emailBtn{background:#6f42c1}
 
-.confetti{
-position:fixed;
-width:8px;
-height:8px;
-top:-10px;
-animation:fall 3s linear forwards;
-}
+    .confetti{
+      position:fixed;
+      width:8px;
+      height:8px;
+      top:-10px;
+      animation:fall 3s linear forwards;
+      z-index:9998;
+    }
 
-@keyframes fall{
-to{transform:translateY(110vh) rotate(720deg)}
-}
+    @keyframes fall{
+      to{transform:translateY(110vh) rotate(720deg)}
+    }
 
-footer{
-font-size:12px;
-margin-top:10px;
-color:#777;
-}
+    footer{
+      font-size:12px;
+      margin-top:10px;
+      color:#777;
+    }
 
-.toast{
-position:fixed;
-bottom:20px;
-left:50%;
-transform:translateX(-50%) translateY(20px);
-background:rgba(34,34,34,0.92);
-color:white;
-padding:10px 16px;
-border-radius:999px;
-font-size:14px;
-opacity:0;
-pointer-events:none;
-transition:opacity .25s ease, transform .25s ease;
-z-index:9999;
-}
+    .toast{
+      position:fixed;
+      bottom:20px;
+      left:50%;
+      transform:translateX(-50%) translateY(20px);
+      background:rgba(34,34,34,0.92);
+      color:white;
+      padding:10px 16px;
+      border-radius:999px;
+      font-size:14px;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .25s ease, transform .25s ease;
+      z-index:9999;
+    }
 
-.toast.show{
-opacity:1;
-transform:translateX(-50%) translateY(0);
-}
+    .toast.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+    }
 
-@media(max-width:480px){
-
-.container{padding:20px}
-
-h1{font-size:22px}
-
-.cardOutput{font-size:15px}
-
-}
-
-</style>
+    @media(max-width:480px){
+      .container{padding:20px}
+      h1{font-size:22px}
+      .cardOutput{font-size:15px}
+    }
+  </style>
 </head>
 
 <body>
+  <div class="container">
+    <div class="emojiRow">🎉🎈🎂🎁</div>
+    <h1>AI Birthday Card Generator</h1>
 
-<div class="container">
+    <label>Name</label>
+    <input id="name" placeholder="Enter name" />
 
-<div class="emojiRow">🎉🎈🎂🎁</div>
-<h1>AI Birthday Card Generator</h1>
+    <label>Age (optional)</label>
+    <input id="age" type="number" placeholder="Optional" />
 
-<label>Name</label>
-<input id="name" placeholder="Enter name" />
+    <label>Hobby (optional)</label>
+    <input id="hobby" placeholder="gaming, cooking, travel..." />
 
-<label>Age (optional)</label>
-<input id="age" type="number" placeholder="Enter age" />
+    <label>Humor Style</label>
+    <select id="style">
+      <option value="funny">Funny</option>
+      <option value="wholesome">Wholesome</option>
+      <option value="roast">Playful Roast</option>
+    </select>
 
-<label>Hobby (optional)</label>
-<input id="hobby" placeholder="gaming, cooking, travel..." />
+    <button id="generateBtn" onclick="generateMessage()">Generate AI Message 🎉</button>
 
-<label>Humor Style</label>
-<select id="style">
-<option value="funny">Funny</option>
-<option value="wholesome">Wholesome</option>
-<option value="roast">Playful Roast</option>
-</select>
+    <div class="cardOutput" id="result">Your birthday message will appear here 🎂</div>
 
-<button onclick="generateMessage()">Generate AI Message 🎉</button>
+    <div class="shareButtons">
+      <button class="copyBtn" onclick="copyMessage()">📋 Copy</button>
+      <button class="whatsappBtn" onclick="shareWhatsApp()">WhatsApp</button>
+      <button class="smsBtn" onclick="shareSMS()">SMS</button>
+      <button class="emailBtn" onclick="shareEmail()">Email</button>
+    </div>
 
-<div class="cardOutput" id="result">Your birthday message will appear here 🎂</div>
+    <footer>Celebrate with AI ✨</footer>
+    <div class="toast" id="toast"></div>
+  </div>
 
-<div class="shareButtons">
-<button class="copyBtn" onclick="copyMessage()">📋 Copy</button>
-<button class="whatsappBtn" onclick="shareWhatsApp()">WhatsApp</button>
-<button class="smsBtn" onclick="shareSMS()">SMS</button>
-<button class="emailBtn" onclick="shareEmail()">Email</button>
-</div>
+  <script>
+    const API_URL = "https://bday-card-generator.vercel.app/api/generate";
+    let toastTimer;
 
-<footer>Celebrate with AI ✨</footer>
-<div class="toast" id="toast"></div>
+    async function generateMessage(){
+      const name = document.getElementById("name").value.trim();
+      const age = document.getElementById("age").value.trim();
+      const hobby = document.getElementById("hobby").value.trim();
+      const style = document.getElementById("style").value;
+      const result = document.getElementById("result");
+      const generateBtn = document.getElementById("generateBtn");
 
-</div>
+      if(!name){
+        result.innerText = "Please enter at least a name 🎂";
+        return;
+      }
 
-<script>
+      result.innerText = "Generating birthday magic... 🎉";
+      generateBtn.disabled = true;
+      generateBtn.innerText = "Generating...";
 
-async function generateMessage(){
+      try{
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name,
+            age,
+            hobby,
+            style
+          })
+        });
 
-const name=document.getElementById("name").value.trim()
-const age=document.getElementById("age").value.trim()
-const hobby=document.getElementById("hobby").value.trim()
-const style=document.getElementById("style").value
+        const data = await response.json();
 
-if(!name){
-document.getElementById("result").innerText="Please enter at least a name 🎂"
-return
-}
+        if(!response.ok){
+          result.innerText = data.error || "AI generation failed.";
+          return;
+        }
 
-document.getElementById("result").innerText="Generating birthday magic... 🎉"
+        result.innerText = data.message || "No message generated.";
+        launchConfetti();
+      }catch(error){
+        result.innerText = "Could not reach AI service.";
+      }finally{
+        generateBtn.disabled = false;
+        generateBtn.innerText = "Generate AI Message 🎉";
+      }
+    }
 
-try{
+    function copyMessage(){
+      const text = document.getElementById("result").innerText;
 
-const response=await fetch("https://bday-card-generator.vercel.app/api/generate",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-name,
-age,
-hobby,
-style
-})
-})
+      if(!text || text.includes("Your birthday message will appear here")){
+        showToast("Generate a message first 🎂");
+        return;
+      }
 
-const data=await response.json()
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          showToast("Copied! 📋");
+        })
+        .catch(() => {
+          showToast("Could not copy message");
+        });
+    }
 
-if(!response.ok){
-document.getElementById("result").innerText=data.error || "AI generation failed."
-return
-}
+    function shareWhatsApp(){
+      const text = encodeURIComponent(document.getElementById("result").innerText);
+      window.open(`https://wa.me/?text=${text}`, "_blank");
+    }
 
-document.getElementById("result").innerText=data.message
-launchConfetti()
+    function shareSMS(){
+      const text = encodeURIComponent(document.getElementById("result").innerText);
+      window.location.href = `sms:?&body=${text}`;
+    }
 
-}catch(err){
+    function shareEmail(){
+      const text = encodeURIComponent(document.getElementById("result").innerText);
+      window.location.href = `mailto:?subject=Birthday Message&body=${text}`;
+    }
 
-document.getElementById("result").innerText="Could not reach AI service."
+    function launchConfetti(){
+      for(let i = 0; i < 60; i++){
+        const conf = document.createElement("div");
+        conf.className = "confetti";
+        conf.style.left = Math.random() * 100 + "vw";
+        conf.style.backgroundColor = `hsl(${Math.random() * 360},70%,60%)`;
+        conf.style.animationDuration = (Math.random() * 2 + 2) + "s";
 
-}
+        document.body.appendChild(conf);
+        setTimeout(() => conf.remove(), 3000);
+      }
+    }
 
-}
+    function showToast(message){
+      const toast = document.getElementById("toast");
+      toast.innerText = message;
+      toast.classList.add("show");
 
-const prompt=`Write a ${style} birthday message for someone named ${name}. ${age?`They are turning ${age}.`:""} ${hobby?`They enjoy ${hobby}.`:""} Keep it fun and under 60 words.`
-
-try{
-
-const response=await fetch("https://api.openai.com/v1/chat/completions",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer YOUR_OPENAI_API_KEY"
-},
-body:JSON.stringify({
-model:"gpt-4o-mini",
-messages:[{role:"user",content:prompt}],
-temperature:0.9
-})
-})
-
-const data=await response.json()
-
-const message=data.choices[0].message.content
-
-document.getElementById("result").innerText=message
-
-launchConfetti()
-
-}catch(err){
-
-document.getElementById("result").innerText="AI generation failed. Check API key." 
-
-}
-
-}
-
-function copyMessage(){
-
-const text=document.getElementById("result").innerText
-
-if(!text || text.includes("Your birthday message will appear here")){
-showToast("Generate a message first 🎂")
-return
-}
-
-navigator.clipboard.writeText(text)
-.then(()=>{
-showToast("Copied! 📋")
-})
-.catch(()=>{
-showToast("Could not copy message")
-})
-
-}
-
-function shareWhatsApp(){
-
-const text=encodeURIComponent(document.getElementById("result").innerText)
-window.open(`https://wa.me/?text=${text}`,'_blank')
-
-}
-
-function shareSMS(){
-
-const text=encodeURIComponent(document.getElementById("result").innerText)
-window.location.href=`sms:?&body=${text}`
-
-}
-
-function shareEmail(){
-
-const text=encodeURIComponent(document.getElementById("result").innerText)
-window.location.href=`mailto:?subject=Birthday Message&body=${text}`
-
-}
-
-function launchConfetti(){
-
-for(let i=0;i<60;i++){
-
-const conf=document.createElement("div")
-conf.className="confetti"
-conf.style.left=Math.random()*100+"vw"
-conf.style.backgroundColor=`hsl(${Math.random()*360},70%,60%)`
-conf.style.animationDuration=(Math.random()*2+2)+"s"
-
-document.body.appendChild(conf)
-
-setTimeout(()=>conf.remove(),3000)
-
-}
-
-}
-
-let toastTimer
-
-function showToast(message){
-const toast=document.getElementById("toast")
-toast.innerText=message
-toast.classList.add("show")
-clearTimeout(toastTimer)
-toastTimer=setTimeout(()=>{
-toast.classList.remove("show")
-},1800)
-}
-
-
-
-</script>
-
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 1800);
+    }
+  </script>
 </body>
 </html>
