@@ -11,13 +11,15 @@ export default async function handler(req, res) {
 
     const { name, age, hobby, style } = body;
 
-    if (!name || !age) {
-      return res.status(400).json({ error: "Name and age are required" });
+    if (!name) {
+      return res.status(400).json({ error: "Name is required" });
     }
 
-    const prompt = `Write a ${style || "funny"} birthday message for someone named ${name} who is turning ${age}. ${
+    const prompt = `Write a ${style || "funny"} birthday message for someone named ${name}. ${
+      age ? `They are turning ${age}.` : ""
+    } ${
       hobby ? `They enjoy ${hobby}.` : ""
-    } Keep it fun, warm, and under 60 words.`;
+    } Keep it fun, warm, and under 60 words. Do not make up an age if one is not provided.`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -26,7 +28,7 @@ export default async function handler(req, res) {
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.9
       })
