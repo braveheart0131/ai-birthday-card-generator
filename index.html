@@ -165,7 +165,7 @@ h1{font-size:22px}
 <input id="name" placeholder="Enter name" />
 
 <label>Age</label>
-<input id="age" type="number" placeholder="Enter age" />
+<input id="age" type="number" placeholder="Optional" />
 
 <label>Hobby (optional)</label>
 <input id="hobby" placeholder="gaming, cooking, travel..." />
@@ -202,7 +202,7 @@ const age=document.getElementById("age").value
 const hobby=document.getElementById("hobby").value
 const style=document.getElementById("style").value
 
-if(!name || !age){
+if(!name){
 document.getElementById("result").innerText="Please enter at least a name and age 🎂"
 return
 }
