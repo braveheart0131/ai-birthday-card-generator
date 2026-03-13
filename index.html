@@ -27,7 +27,7 @@
 
     .container{
       width:100%;
-      max-width:500px;
+      max-width:560px;
       background:white;
       border-radius:18px;
       padding:26px;
@@ -99,6 +99,42 @@
       line-height:1.5;
     }
 
+    .optionsWrap{
+      margin-top:16px;
+      display:none;
+      text-align:left;
+    }
+
+    .optionsTitle{
+      font-size:14px;
+      font-weight:700;
+      margin-bottom:10px;
+      color:#444;
+    }
+
+    .optionButtons{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:8px;
+    }
+
+    .optionBtn{
+      margin-top:0;
+      padding:10px 8px;
+      font-size:14px;
+      border-radius:10px;
+      border:none;
+      background:#f1f1f1;
+      color:#333;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .optionBtn.active{
+      background:linear-gradient(135deg,#ff4d6d,#ff8fab);
+      color:white;
+    }
+
     .shareButtons{
       display:grid;
       grid-template-columns:repeat(2,1fr);
@@ -161,6 +197,9 @@
       .container{padding:20px}
       h1{font-size:22px}
       .cardOutput{font-size:15px}
+      .optionButtons{
+        grid-template-columns:repeat(3,1fr);
+      }
     }
   </style>
 </head>
@@ -190,6 +229,11 @@
 
     <div class="cardOutput" id="result">Your birthday message will appear here 🎂</div>
 
+    <div class="optionsWrap" id="optionsWrap">
+      <div class="optionsTitle">Choose 1 of 5 message options</div>
+      <div class="optionButtons" id="optionButtons"></div>
+    </div>
+
     <div class="shareButtons">
       <button class="copyBtn" onclick="copyMessage()">📋 Copy</button>
       <button class="whatsappBtn" onclick="shareWhatsApp()">WhatsApp</button>
@@ -204,6 +248,8 @@
   <script>
     const API_URL = "https://bday-card-generator.vercel.app/api/generate";
     let toastTimer;
+    let generatedMessages = [];
+    let selectedMessageIndex = 0;
 
     async function generateMessage(){
       const name = document.getElementById("name").value.trim();
@@ -212,13 +258,22 @@
       const style = document.getElementById("style").value;
       const result = document.getElementById("result");
       const generateBtn = document.getElementById("generateBtn");
+      const optionsWrap = document.getElementById("optionsWrap");
+      const optionButtons = document.getElementById("optionButtons");
 
       if(!name){
         result.innerText = "Please enter at least a name 🎂";
+        optionsWrap.style.display = "none";
+        optionButtons.innerHTML = "";
         return;
       }
 
       result.innerText = "Generating birthday magic... 🎉";
+      optionsWrap.style.display = "none";
+      optionButtons.innerHTML = "";
+      generatedMessages = [];
+      selectedMessageIndex = 0;
+
       generateBtn.disabled = true;
       generateBtn.innerText = "Generating...";
 
@@ -243,7 +298,17 @@
           return;
         }
 
-        result.innerText = data.message || "No message generated.";
+        if(!Array.isArray(data.messages) || data.messages.length === 0){
+          result.innerText = "No messages generated.";
+          return;
+        }
+
+        generatedMessages = data.messages;
+        selectedMessageIndex = 0;
+        result.innerText = generatedMessages[selectedMessageIndex];
+
+        renderOptionButtons();
+        optionsWrap.style.display = "block";
         launchConfetti();
       }catch(error){
         result.innerText = "Could not reach AI service.";
@@ -253,10 +318,36 @@
       }
     }
 
-    function copyMessage(){
-      const text = document.getElementById("result").innerText;
+    function renderOptionButtons(){
+      const optionButtons = document.getElementById("optionButtons");
+      optionButtons.innerHTML = "";
 
-      if(!text || text.includes("Your birthday message will appear here")){
+      generatedMessages.forEach((_, index) => {
+        const btn = document.createElement("button");
+        btn.className = "optionBtn" + (index === selectedMessageIndex ? " active" : "");
+        btn.innerText = index + 1;
+        btn.onclick = () => selectMessage(index);
+        optionButtons.appendChild(btn);
+      });
+    }
+
+    function selectMessage(index){
+      selectedMessageIndex = index;
+      document.getElementById("result").innerText = generatedMessages[index];
+      renderOptionButtons();
+    }
+
+    function getCurrentMessage(){
+      if(Array.isArray(generatedMessages) && generatedMessages.length > 0){
+        return generatedMessages[selectedMessageIndex] || "";
+      }
+      return "";
+    }
+
+    function copyMessage(){
+      const text = getCurrentMessage();
+
+      if(!text){
         showToast("Generate a message first 🎂");
         return;
       }
@@ -271,18 +362,36 @@
     }
 
     function shareWhatsApp(){
-      const text = encodeURIComponent(document.getElementById("result").innerText);
-      window.open(`https://wa.me/?text=${text}`, "_blank");
+      const text = getCurrentMessage();
+
+      if(!text){
+        showToast("Generate a message first 🎂");
+        return;
+      }
+
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
     }
 
     function shareSMS(){
-      const text = encodeURIComponent(document.getElementById("result").innerText);
-      window.location.href = `sms:?&body=${text}`;
+      const text = getCurrentMessage();
+
+      if(!text){
+        showToast("Generate a message first 🎂");
+        return;
+      }
+
+      window.location.href = `sms:?&body=${encodeURIComponent(text)}`;
     }
 
     function shareEmail(){
-      const text = encodeURIComponent(document.getElementById("result").innerText);
-      window.location.href = `mailto:?subject=Birthday Message&body=${text}`;
+      const text = getCurrentMessage();
+
+      if(!text){
+        showToast("Generate a message first 🎂");
+        return;
+      }
+
+      window.location.href = `mailto:?subject=Birthday Message&body=${encodeURIComponent(text)}`;
     }
 
     function launchConfetti(){
