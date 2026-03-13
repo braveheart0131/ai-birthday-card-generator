@@ -21,11 +21,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Name is required" });
     }
 
-    // Default to birthday for backward compatibility with your current UI
     const safeOccasion = occasion || "birthday";
 
-    // Keep the variable section compact.
-    // Omit blank fields to reduce tokens.
     const userLines = [
       `Occasion: ${safeOccasion}`,
       `Name: ${name}`,
@@ -36,31 +33,7 @@ export default async function handler(req, res) {
 
     const response = await openai.responses.create({
       model: "gpt-5-mini",
-      prompt_cache_retention: "24h",
       max_output_tokens: 220,
-      temperature: 0.9,
-      text: {
-        format: {
-          type: "json_schema",
-          name: "celebration_message_options",
-          schema: {
-            type: "object",
-            additionalProperties: false,
-            properties: {
-              messages: {
-                type: "array",
-                minItems: 5,
-                maxItems: 5,
-                items: {
-                  type: "string",
-                  maxLength: 180,
-                },
-              },
-            },
-            required: ["messages"],
-          },
-        },
-      },
       input: [
         {
           role: "developer",
@@ -69,52 +42,44 @@ export default async function handler(req, res) {
               type: "input_text",
               text:
                 "You write short, warm, natural celebration messages. " +
-                "Return exactly 5 unique message options. " +
-                "Each message must be concise, friendly, and suitable for a card, text, or social post. " +
-                "Do not number the messages. " +
-                "Do not include explanations. " +
+                "Return exactly 5 unique message options as JSON in this format: " +
+                '{"messages":["msg1","msg2","msg3","msg4","msg5"]}. ' +
                 "Do not invent an age if one is not provided. " +
-                "Do not repeat the same wording across options. " +
-                "Keep each message under 60 words.",
-            },
-          ],
+                "Keep each message under 60 words."
+            }
+          ]
         },
         {
           role: "user",
           content: [
             {
               type: "input_text",
-              text: userLines.join("\n"),
-            },
-          ],
-        },
-      ],
+              text: userLines.join("\n")
+            }
+          ]
+        }
+      ]
     });
+
+    const outputText = response.output_text || "";
 
     let parsed;
-
     try {
-      parsed = JSON.parse(response.output_text);
-    } catch (parseError) {
-      console.error("JSON parse failed:", parseError);
-      console.error("Raw model output:", response.output_text);
-      return res.status(500).json({ error: "Invalid model response" });
+      parsed = JSON.parse(outputText);
+    } catch (e) {
+      console.error("Model output was not valid JSON:", outputText);
+      return res.status(500).json({ error: "Model returned invalid JSON" });
     }
 
-    if (
-      !parsed ||
-      !Array.isArray(parsed.messages) ||
-      parsed.messages.length !== 5
-    ) {
-      console.error("Unexpected response format:", parsed);
-      return res.status(500).json({ error: "Unexpected response format" });
+    if (!parsed.messages || !Array.isArray(parsed.messages)) {
+      return res.status(500).json({ error: "Invalid response format from model" });
     }
 
-    return res.status(200).json({
-      messages: parsed.messages,
-    });
+    return res.status(200).json({ messages: parsed.messages });
   } catch (error) {
     console.error("Server error:", error);
-    return res.status(500).json({ error: "AI generation failed" });
+    return res.status(500).json({
+      error: error?.message || "AI generation failed"
+    });
   }
 }
