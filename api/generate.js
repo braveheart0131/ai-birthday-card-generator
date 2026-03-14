@@ -1,9 +1,3 @@
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export default async function handler(req, res) {
   try {
     if (req.method !== "POST") {
@@ -15,67 +9,62 @@ export default async function handler(req, res) {
         ? JSON.parse(req.body)
         : req.body || {};
 
-    const { name, age, hobby, style, occasion } = body;
+    const name = (body.name || "").trim();
+    const age = (body.age || "").toString().trim();
+    const hobby = (body.hobby || "").trim();
+    const style = (body.style || "funny").trim();
+    const occasion = (body.occasion || "birthday").trim();
+    const count = Math.min(Math.max(parseInt(body.count || 5, 10), 1), 5);
 
     if (!name) {
       return res.status(400).json({ error: "Name is required" });
     }
 
-    const safeOccasion = occasion || "birthday";
+    const prompt = `Write ${count} different ${style} ${occasion} messages for someone named ${name}.
+${age ? `They are turning ${age}.` : ""}
+${hobby ? `They enjoy ${hobby}.` : ""}
+Each message should be under 40 words.
+Do not make up an age if one is not provided.
+Return them as a numbered list only.`;
 
-    const userLines = [
-      `Occasion: ${safeOccasion}`,
-      `Name: ${name}`,
-      style ? `Style: ${style}` : "Style: funny",
-      age ? `Age: ${age}` : null,
-      hobby ? `Hobby: ${hobby}` : null,
-    ].filter(Boolean);
-
-    const response = await openai.responses.create({
-      model: "gpt-5-mini",
-      max_output_tokens: 220,
-      input: [
-        {
-          role: "developer",
-          content: [
-            {
-              type: "input_text",
-              text:
-                "You write short, warm, natural celebration messages. " +
-                "Return exactly 5 unique message options as JSON in this format: " +
-                '{"messages":["msg1","msg2","msg3","msg4","msg5"]}. ' +
-                "Do not invent an age if one is not provided. " +
-                "Keep each message under 60 words."
-            }
-          ]
-        },
-        {
-          role: "user",
-          content: [
-            {
-              type: "input_text",
-              text: userLines.join("\n")
-            }
-          ]
-        }
-      ]
+    const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.9
+      })
     });
 
-    const outputText = response.output_text || "";
+    const data = await openaiResponse.json();
 
-    let parsed;
-    try {
-      parsed = JSON.parse(outputText);
-    } catch (e) {
-      console.error("Model output was not valid JSON:", outputText);
-      return res.status(500).json({ error: "Model returned invalid JSON" });
+    if (!openaiResponse.ok) {
+      console.error("OpenAI API error:", JSON.stringify(data, null, 2));
+      return res.status(openaiResponse.status).json({
+        error: data?.error?.message || "OpenAI request failed"
+      });
     }
 
-    if (!parsed.messages || !Array.isArray(parsed.messages)) {
-      return res.status(500).json({ error: "Invalid response format from model" });
+    const text = data?.choices?.[0]?.message?.content || "";
+
+    const messages = text
+      .split(/\n+/)
+      .map((line) => line.replace(/^[0-9]+[.)-]?\s*/, "").trim())
+      .filter(Boolean)
+      .slice(0, count);
+
+    if (!messages.length) {
+      console.error("No messages parsed from model output:", text);
+      return res.status(500).json({ error: "No messages generated" });
     }
 
-    return res.status(200).json({ messages: parsed.messages });
+    return res.status(200).json({ messages });
   } catch (error) {
     console.error("Server error:", error);
     return res.status(500).json({
